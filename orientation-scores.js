@@ -7,10 +7,11 @@ var ops = require('ndarray-ops');
 function makeKernels(shape, numOrientations) {
     var r, c, rd, cd, angle, angleL, i,
         rows = shape[0], cols = shape[1],
-        halfRows=rows>>1, halfCols=cols>>1,
+        halfRows = rows>>1, halfCols = cols>>1,
         kernels = ndarray(new Float32Array(numOrientations*rows*cols), [numOrientations,rows,cols]);
     // Assign double cones of the spectrum to each kernel, using a very simple (first order) B-spline to ensure that for each position the total comes to one.
     // TODO: Use higher order (cardinal) spline.
+    // TODO: Figure out a way to make this rotationally invariant without sacrificing the reconstruction properties.
     for(r=0; r<rows; r++) {
         for(c=0; c<cols; c++) {
             // TODO: What if r==h-r? Should we average the results for both directions?
@@ -31,6 +32,7 @@ function makeKernels(shape, numOrientations) {
     // TODO: Force kernels to have bounded spatial support.
     // The easiest method is to transform them to the spatial domain, multiply them with a bell function of some sort, and then transform back.
     // If the "center" value of the bell function is one, this preserves the required properties of the orientation score kernels.
+    // The main issue is figuring out the right shape of the bell function.
     
     return kernels;
 }
