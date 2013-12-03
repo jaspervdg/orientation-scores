@@ -17,7 +17,8 @@
   },
   "devDependencies": {
     "tape": "~2.3.0",
-    "lena": "~1.0.0"
+    "lena": "~1.0.0",
+    "save-pixels": "~0.3.0"
   },
   "dependencies": {
     "zeros": "0.0.0",
