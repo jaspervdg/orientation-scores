@@ -2,12 +2,14 @@ var zeros = require('zeros');
 var ndarray = require('ndarray');
 var fft = require('ndarray-fft');
 var ops = require('ndarray-ops');
+var pool = require('typedarray-pool');
 
 // Creates the required kernels in the frequency domain.
-function makeKernels(shape, numOrientations) {
+function makeKernels(kernels) {
     var r, c, rd, cd, angle, angleL, i,
-        rows = shape[0], cols = shape[1],
-        kernels = ndarray(new Float32Array(numOrientations*rows*cols), [numOrientations,rows,cols]);
+        numOrientations = kernels.shape[0], 
+        rows = kernels.shape[1], 
+        cols = kernels.shape[2];
     // Assign double cones of the spectrum to each kernel, using a very simple (first order) B-spline to ensure that for each position the total comes to one.
     // TODO: Use higher order (cardinal) spline.
     // TODO: Figure out a way to make this rotationally invariant without sacrificing the reconstruction properties.
@@ -52,18 +54,26 @@ module.exports = function(imgarr, numOrientations) {
     //assert(numOrientations >= 2);
     var i,
         rows = imgarr.shape[0], cols = imgarr.shape[1],
-        kernels = makeKernels(imgarr.shape, numOrientations),
+        kernels = ndarray(pool.mallocFloat(numOrientations*rows*cols), [numOrientations,rows,cols]),
         imgnew = ndarray(new Float32Array(numOrientations*rows*cols), [numOrientations,rows,cols]),
-        imgnewI = zeros([numOrientations,rows,cols]);
+        imgnewI = ndarray(pool.mallocFloat(rows * cols), [rows, cols]);
+
+    //Make kernels
+    makeKernels(kernels);
         
     // TODO: Use an FFT that can deal "natively" with real-only signals.
     for(i=0; i<numOrientations; i++) {
         ops.assign(imgnew.pick(i), imgarr);
-        fft(1, imgnew.pick(i),imgnewI.pick(i));
+        ops.assigns(imgnewI, 0.0);
+        fft(1, imgnew.pick(i),imgnewI);
         ops.muleq(imgnew.pick(i), kernels.pick(i));
-        ops.muleq(imgnewI.pick(i), kernels.pick(i));
-        fft(-1, imgnew.pick(i),imgnewI.pick(i));
+        ops.muleq(imgnewI, kernels.pick(i));
+        fft(-1, imgnew.pick(i),imgnewI);
     }
+
+    //Release temporaries
+    pool.freeFloat(kernels.data);
+    pool.freeFloat(imgnewI.data);
 
     return imgnew;
 }
