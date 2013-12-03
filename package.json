@@ -4,7 +4,7 @@
   "description": "Computes invertible orientation scores.",
   "main": "orientation-scores.js",
   "scripts": {
-    "test": "test.js"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -14,5 +14,15 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jaspervdg/orientation-scores/issues"
+  },
+  "devDependencies": {
+    "tape": "~2.3.0",
+    "lena": "~1.0.0"
+  },
+  "dependencies": {
+    "zeros": "0.0.0",
+    "ndarray": "~1.0.9",
+    "ndarray-fft": "~0.1.0",
+    "ndarray-ops": "~1.1.1"
   }
 }
