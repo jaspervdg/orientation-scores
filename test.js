@@ -57,13 +57,12 @@ test("rotation invariance", function(t) {
     img2O = orientationScore(img2, numOrientations);
     img1Os = img1O.lo(0,0,30).hi(numOrientations,31,31);
     img2Os = img2O.lo(0,0,30).hi(numOrientations,31,31);
-    console.log(ops.sum(img1Os));
 
     for(i=0; i<numOrientations; i++) {
         ops.subeq(img1Os.pick(i), img2Os.pick((numOrientations*3/2-i)%numOrientations).transpose(1,0));
         ops.powseq(img1Os.pick(i), 2);
         err = Math.sqrt(ops.sum(img1Os.pick(i))/(img1Os.shape[1]*img1Os.shape[2]));
-        t.ok(err<=1e-3, "RMS error <= 1e-3 (is actually " + err + ").");
+        t.ok(err<=1e-3, "RMS error <= 1e-3 (is actually " + err + ", " + i + "-" + ((numOrientations*3/2-i)%numOrientations) + ").");
     }
     
     t.end();

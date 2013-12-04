@@ -3,10 +3,12 @@ var zeros = require('zeros');
 var ndarray = require('ndarray');
 var fft = require('ndarray-fft');
 var ops = require('ndarray-ops');
+var splines = require('splines');
 
 // Creates the required kernels in the frequency domain.
 function makeKernels(shape, numOrientations) {
     var r, c, rd, cd, angle, angleL, i,
+        spline = splines.bspline(Math.min(numOrientations-1,3), numOrientations),
         rows = shape[0], cols = shape[1],
         kernels = ndarray(new Float32Array(numOrientations*rows*cols), [numOrientations,rows,cols]);
     // Assign double cones of the spectrum to each kernel, using a very simple (first order) B-spline to ensure that for each position the total comes to one.
@@ -22,9 +24,8 @@ function makeKernels(shape, numOrientations) {
             if (rd*rd+cd*cd < 0.25) {
                 angle = Math.atan2(rd,cd)*numOrientations/Math.PI;
                 for(i=0; i<numOrientations; i++) {
-                    angleL = (angle + 2*numOrientations - i)%numOrientations;
-                    angleL = Math.min(angleL,numOrientations-angleL);
-                    kernels.set(i,r,c, Math.max(0,1-angleL));
+                    angleL = angle + 2*numOrientations - i;
+                    kernels.set(i,r,c, spline(angleL));
                 }
             } else {
                 for(i=0; i<numOrientations; i++) {
