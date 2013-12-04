@@ -1,3 +1,4 @@
+var assert = require("assert");
 var zeros = require('zeros');
 var ndarray = require('ndarray');
 var fft = require('ndarray-fft');
@@ -48,8 +49,8 @@ function makeKernels(shape, numOrientations) {
 // For now we can only handle 2D images.
 // TODO: Make imgnew to have a data type that is kind of the "join" of the types of the kernels we make and the data type used for imgarr.
 module.exports = function(imgarr, numOrientations) {
-    //assert(imgarr.shape.length == 2);
-    //assert(numOrientations >= 2);
+    assert(imgarr.shape.length == 2, "Orientation scores only support 2D images.");
+    assert(numOrientations >= 2, "Orientation scores can only be built for two or more orientations.");
     var i,
         rows = imgarr.shape[0], cols = imgarr.shape[1],
         kernels = makeKernels(imgarr.shape, numOrientations),
