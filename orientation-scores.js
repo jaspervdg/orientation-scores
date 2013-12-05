@@ -12,7 +12,6 @@ function makeKernels(shape, numOrientations) {
         rows = shape[0], cols = shape[1],
         kernels = ndarray(new Float32Array(numOrientations*rows*cols), [numOrientations,rows,cols]);
     // Assign double cones of the spectrum to each kernel, using a very simple (first order) B-spline to ensure that for each position the total comes to one.
-    // TODO: Use higher order (cardinal) spline.
     // TODO: Figure out a way to make this rotationally invariant without sacrificing the reconstruction properties.
     for(r=0; r<rows; r++) {
         for(c=0; c<cols; c++) {
@@ -21,16 +20,10 @@ function makeKernels(shape, numOrientations) {
             cd = c<cols-c ? c : (c-cols);
             rd /= rows; // The domain of the discrete Fourier transform is bounded based on the sample distance, the spacing within those bounds by the bounds of the spatial domain.
             cd /= cols;
-            if (rd*rd+cd*cd < 0.25) {
-                angle = Math.atan2(rd,cd)*numOrientations/Math.PI;
-                for(i=0; i<numOrientations; i++) {
-                    angleL = angle + 2*numOrientations - i;
-                    kernels.set(i,r,c, spline(angleL));
-                }
-            } else {
-                for(i=0; i<numOrientations; i++) {
-                    kernels.set(i,r,c, 1/numOrientations);
-                }
+            angle = Math.atan2(rd,cd)*numOrientations/Math.PI;
+            for(i=0; i<numOrientations; i++) {
+                angleL = angle + 2*numOrientations - i;
+                kernels.set(i,r,c, spline(angleL));
             }
         }
     }
